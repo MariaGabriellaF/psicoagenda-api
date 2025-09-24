@@ -27,11 +27,9 @@ public class Disponibilidade implements Serializable {
     @Enumerated(EnumType.STRING)
     private DiaSemana diaSemana;
 
-    // Construtor padrão (necessário para JPA)
     public Disponibilidade() {
     }
 
-    // Construtor com todos os campos
     public Disponibilidade(Psicologo psicologo, LocalDateTime startAt, LocalDateTime endAt, boolean recorrente, DiaSemana diaSemana) {
         this.psicologo = psicologo;
         this.startAt = startAt;
@@ -40,7 +38,6 @@ public class Disponibilidade implements Serializable {
         this.diaSemana = diaSemana;
     }
 
-    // Métodos Getters e Setters
     public Long getId() {
         return id;
     }

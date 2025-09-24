@@ -33,7 +33,6 @@ public class PacienteService {
         paciente.setUser(user);
 
         User savedUser = userService.save(user);
-        // paciente.setId(savedUser.getId()); // <<< LINHA REMOVIDA
         paciente.setUser(savedUser);
 
         return pacienteRepository.save(paciente);

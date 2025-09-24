@@ -26,7 +26,6 @@ public class Psicologo implements Serializable {
     @JoinColumn(name = "id")
     private User user;
 
-    // Construtor padrão (necessário para JPA)
     public Psicologo() {
     }
 
@@ -38,7 +37,6 @@ public class Psicologo implements Serializable {
         this.user = user;
     }
 
-    // Métodos Getters e Setters
     public Long getId() {
         return id;
     }

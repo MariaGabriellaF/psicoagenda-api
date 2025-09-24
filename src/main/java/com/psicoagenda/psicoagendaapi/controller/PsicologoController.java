@@ -58,8 +58,6 @@ public class PsicologoController {
             if (psicologoDto.getCrp() != null) {
                 psicologoAtualizado.setCrp(psicologoDto.getCrp());
             }
-            // O tipo boolean não pode ser nulo, mas o tipo Boolean pode.
-            // Para não ter o erro, é preciso incluir o campo no DTO
             if (psicologoDto.isTeleatendimento() != psicologoAtualizado.isTeleatendimento()) {
                 psicologoAtualizado.setTeleatendimento(psicologoDto.isTeleatendimento());
             }

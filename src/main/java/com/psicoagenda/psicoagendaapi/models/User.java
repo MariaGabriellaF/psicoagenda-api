@@ -24,7 +24,6 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Métodos Getters e Setters
     public Long getId() {
         return id;
     }

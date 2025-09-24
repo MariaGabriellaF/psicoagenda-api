@@ -58,7 +58,6 @@ public class DisponibilidadeController {
             if (disponibilidadeDto.getDiaSemana() != null) {
                 disponibilidadeAtualizada.setDiaSemana(com.psicoagenda.psicoagendaapi.models.DiaSemana.valueOf(disponibilidadeDto.getDiaSemana()));
             }
-            // O tipo boolean não pode ser nulo
             if (disponibilidadeDto.isRecorrente() != disponibilidadeAtualizada.isRecorrente()) {
                 disponibilidadeAtualizada.setRecorrente(disponibilidadeDto.isRecorrente());
             }

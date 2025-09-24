@@ -20,7 +20,6 @@ public class Paciente implements Serializable {
     @JoinColumn(name = "id")
     private User user;
 
-    // Construtor padrão (necessário para JPA)
     public Paciente() {
     }
 
@@ -30,7 +29,7 @@ public class Paciente implements Serializable {
         this.user = user;
     }
 
-    // Métodos Getters e Setters
+
     public Long getId() {
         return id;
     }

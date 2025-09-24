@@ -35,11 +35,9 @@ public class Agendamento implements Serializable {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Construtor padrão (necessário para JPA)
     public Agendamento() {
     }
 
-    // Construtor com todos os campos
     public Agendamento(Psicologo psicologo, Paciente paciente, LocalDateTime startAt, LocalDateTime endAt, StatusAgendamento status, String observacoes) {
         this.psicologo = psicologo;
         this.paciente = paciente;
@@ -54,7 +52,6 @@ public class Agendamento implements Serializable {
         this.createdAt = LocalDateTime.now();
     }
 
-    // Métodos Getters e Setters
     public Long getId() {
         return id;
     }
