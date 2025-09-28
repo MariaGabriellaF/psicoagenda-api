@@ -1,27 +1,12 @@
 package com.psicoagenda.psicoagendaapi.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-public class DisponibilidadeRequestDTO {
-    @NotNull
-    private Long psicologoId;
-    @NotNull
+public class DisponibilidadeUpdateRequestDTO {
     private LocalDateTime startAt;
-    @NotNull
     private LocalDateTime endAt;
-    private boolean recorrente;
-    @NotBlank
+    private Boolean recorrente;
     private String diaSemana;
-
-    public Long getPsicologoId() {
-        return psicologoId;
-    }
-
-    public void setPsicologoId(Long psicologoId) {
-        this.psicologoId = psicologoId;
-    }
 
     public LocalDateTime getStartAt() {
         return startAt;
@@ -39,11 +24,11 @@ public class DisponibilidadeRequestDTO {
         this.endAt = endAt;
     }
 
-    public boolean isRecorrente() {
+    public Boolean getRecorrente() {
         return recorrente;
     }
 
-    public void setRecorrente(boolean recorrente) {
+    public void setRecorrente(Boolean recorrente) {
         this.recorrente = recorrente;
     }
 

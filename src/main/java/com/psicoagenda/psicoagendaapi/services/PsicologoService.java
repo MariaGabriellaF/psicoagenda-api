@@ -6,6 +6,7 @@ import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.models.User;
 import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.repository.PsicologoRepository;
+import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,6 @@ public class PsicologoService {
         psicologo.setTeleatendimento(psicologoDto.isTeleatendimento());
 
         User savedUser = userService.save(user);
-        // psicologo.setId(savedUser.getId()); // <<< LINHA REMOVIDA
         psicologo.setUser(savedUser);
 
         return psicologoRepository.save(psicologo);
@@ -60,8 +60,9 @@ public class PsicologoService {
         return psicologoRepository.findAll();
     }
 
-    public Optional<Psicologo> findById(Long id) {
-        return psicologoRepository.findById(id);
+    public Psicologo findById(Long id) {
+        return psicologoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Psicologo com o ID " + id + " não encontrado."));
     }
 
     public void delete(Long id) {

@@ -1,16 +1,8 @@
 package com.psicoagenda.psicoagendaapi.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-public class PacienteRequestDTO {
-    @NotBlank
+public class PacienteUpdateRequestDTO {
     private String nome;
     private String telefone;
-    @NotNull
-    @Valid
-    private UserRequestDTO user;
 
     public String getNome() {
         return nome;
@@ -26,13 +18,5 @@ public class PacienteRequestDTO {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
-    }
-
-    public UserRequestDTO getUser() {
-        return user;
-    }
-
-    public void setUser(UserRequestDTO user) {
-        this.user = user;
     }
 }

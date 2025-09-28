@@ -2,10 +2,14 @@ package com.psicoagenda.psicoagendaapi.controller;
 
 import com.psicoagenda.psicoagendaapi.dto.AgendamentoRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.AgendamentoResponseDTO;
+import com.psicoagenda.psicoagendaapi.dto.AgendamentoUpdateRequestDTO;
 import com.psicoagenda.psicoagendaapi.models.Agendamento;
 import com.psicoagenda.psicoagendaapi.services.AgendamentoService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/agendamentos")
+@Validated
 public class AgendamentoController {
 
     @Autowired
@@ -27,48 +32,39 @@ public class AgendamentoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AgendamentoResponseDTO> listarAgendamentoPorId(@PathVariable Long id) {
-        Optional<Agendamento> agendamento = agendamentoService.findById(id);
-        if (agendamento.isPresent()) {
-            AgendamentoResponseDTO dto = agendamentoService.toResponseDTO(agendamento.get());
-            return ResponseEntity.ok(dto);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<AgendamentoResponseDTO> listarAgendamentoPorId(@PathVariable @Min(1) Long id) {
+        Agendamento agendamento = agendamentoService.findById(id);
+        AgendamentoResponseDTO dto = agendamentoService.toResponseDTO(agendamento);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public AgendamentoResponseDTO criarAgendamento(@RequestBody AgendamentoRequestDTO agendamentoDto) {
+    public AgendamentoResponseDTO criarAgendamento(@Valid @RequestBody AgendamentoRequestDTO agendamentoDto) {
         Agendamento agendamentoCriado = agendamentoService.save(agendamentoDto);
         return agendamentoService.toResponseDTO(agendamentoCriado);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<AgendamentoResponseDTO> atualizarAgendamento(@PathVariable Long id, @RequestBody AgendamentoRequestDTO agendamentoDto) {
-        Optional<Agendamento> agendamentoExistente = agendamentoService.findById(id);
-        if (agendamentoExistente.isPresent()) {
-            Agendamento agendamentoAtualizado = agendamentoExistente.get();
-            if (agendamentoDto.getStartAt() != null) {
-                agendamentoAtualizado.setStartAt(agendamentoDto.getStartAt());
-            }
-            if (agendamentoDto.getEndAt() != null) {
-                agendamentoAtualizado.setEndAt(agendamentoDto.getEndAt());
-            }
-            if (agendamentoDto.getStatus() != null) {
-                agendamentoAtualizado.setStatus(com.psicoagenda.psicoagendaapi.models.StatusAgendamento.valueOf(agendamentoDto.getStatus()));
-            }
-            if (agendamentoDto.getObservacoes() != null) {
-                agendamentoAtualizado.setObservacoes(agendamentoDto.getObservacoes());
-            }
-            Agendamento agendamentoSalvo = agendamentoService.save(agendamentoAtualizado);
-            return ResponseEntity.ok(agendamentoService.toResponseDTO(agendamentoSalvo));
-        } else {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<AgendamentoResponseDTO> atualizarAgendamento(@PathVariable @Min(1) Long id, @RequestBody AgendamentoUpdateRequestDTO agendamentoDto) {
+        Agendamento agendamentoExistente = agendamentoService.findById(id);
+        if (agendamentoDto.getStartAt() != null) {
+            agendamentoExistente.setStartAt(agendamentoDto.getStartAt());
         }
+        if (agendamentoDto.getEndAt() != null) {
+            agendamentoExistente.setEndAt(agendamentoDto.getEndAt());
+        }
+        if (agendamentoDto.getStatus() != null) {
+            agendamentoExistente.setStatus(com.psicoagenda.psicoagendaapi.models.StatusAgendamento.valueOf(agendamentoDto.getStatus()));
+        }
+        if (agendamentoDto.getObservacoes() != null) {
+            agendamentoExistente.setObservacoes(agendamentoDto.getObservacoes());
+        }
+        Agendamento agendamentoSalvo = agendamentoService.save(agendamentoExistente);
+        return ResponseEntity.ok(agendamentoService.toResponseDTO(agendamentoSalvo));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarAgendamento(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarAgendamento(@PathVariable @Min(1) Long id) {
         agendamentoService.delete(id);
         return ResponseEntity.noContent().build();
     }

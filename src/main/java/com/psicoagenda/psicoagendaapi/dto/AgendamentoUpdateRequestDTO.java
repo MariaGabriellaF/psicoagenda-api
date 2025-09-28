@@ -1,37 +1,12 @@
 package com.psicoagenda.psicoagendaapi.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-public class AgendamentoRequestDTO {
-    @NotNull
-    private Long psicologoId;
-    @NotNull
-    private Long pacienteId;
-    @NotNull
+public class AgendamentoUpdateRequestDTO {
     private LocalDateTime startAt;
-    @NotNull
     private LocalDateTime endAt;
-    @NotBlank
     private String status;
     private String observacoes;
-
-    public Long getPsicologoId() {
-        return psicologoId;
-    }
-
-    public void setPsicologoId(Long psicologoId) {
-        this.psicologoId = psicologoId;
-    }
-
-    public Long getPacienteId() {
-        return pacienteId;
-    }
-
-    public void setPacienteId(Long pacienteId) {
-        this.pacienteId = pacienteId;
-    }
 
     public LocalDateTime getStartAt() {
         return startAt;

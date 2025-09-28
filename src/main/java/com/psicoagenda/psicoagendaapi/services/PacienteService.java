@@ -6,6 +6,7 @@ import com.psicoagenda.psicoagendaapi.models.Paciente;
 import com.psicoagenda.psicoagendaapi.models.User;
 import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.repository.PacienteRepository;
+import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +56,9 @@ public class PacienteService {
         return pacienteRepository.findAll();
     }
 
-    public Optional<Paciente> findById(Long id) {
-        return pacienteRepository.findById(id);
+    public Paciente findById(Long id) {
+        return pacienteRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente com o ID " + id + " não encontrado."));
     }
 
     public void delete(Long id) {

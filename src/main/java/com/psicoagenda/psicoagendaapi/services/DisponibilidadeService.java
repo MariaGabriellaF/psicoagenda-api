@@ -6,7 +6,8 @@ import com.psicoagenda.psicoagendaapi.models.Disponibilidade;
 import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.models.DiaSemana;
 import com.psicoagenda.psicoagendaapi.repository.DisponibilidadeRepository;
-import com.psicoagenda.psicoagendaapi.repository.PsicologoRepository;
+import com.psicoagenda.psicoagendaapi.services.PsicologoService;
+import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +22,13 @@ public class DisponibilidadeService {
     private DisponibilidadeRepository disponibilidadeRepository;
 
     @Autowired
-    private PsicologoRepository psicologoRepository;
+    private PsicologoService psicologoService;
 
     public Disponibilidade save(DisponibilidadeRequestDTO disponibilidadeDto) {
-        Optional<Psicologo> psicologo = psicologoRepository.findById(disponibilidadeDto.getPsicologoId());
-        if (psicologo.isEmpty()) {
-            // Tratamento de erro ou exceção, se o psicólogo não for encontrado
-            return null;
-        }
+        Psicologo psicologo = psicologoService.findById(disponibilidadeDto.getPsicologoId());
 
         Disponibilidade disponibilidade = new Disponibilidade();
-        disponibilidade.setPsicologo(psicologo.get());
+        disponibilidade.setPsicologo(psicologo);
         disponibilidade.setStartAt(disponibilidadeDto.getStartAt());
         disponibilidade.setEndAt(disponibilidadeDto.getEndAt());
         disponibilidade.setRecorrente(disponibilidadeDto.isRecorrente());
@@ -60,8 +57,9 @@ public class DisponibilidadeService {
         return disponibilidadeRepository.findAll();
     }
 
-    public Optional<Disponibilidade> findById(Long id) {
-        return disponibilidadeRepository.findById(id);
+    public Disponibilidade findById(Long id) {
+        return disponibilidadeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Disponibilidade com o ID " + id + " não encontrada."));
     }
 
     public void delete(Long id) {

@@ -2,10 +2,14 @@ package com.psicoagenda.psicoagendaapi.controller;
 
 import com.psicoagenda.psicoagendaapi.dto.PacienteRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.PacienteResponseDTO;
+import com.psicoagenda.psicoagendaapi.dto.PacienteUpdateRequestDTO;
 import com.psicoagenda.psicoagendaapi.models.Paciente;
 import com.psicoagenda.psicoagendaapi.services.PacienteService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/pacientes")
+@Validated
 public class PacienteController {
 
     @Autowired
@@ -27,44 +32,35 @@ public class PacienteController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PacienteResponseDTO> listarPacientePorId(@PathVariable Long id) {
-        Optional<Paciente> paciente = pacienteService.findById(id);
-        if (paciente.isPresent()) {
-            PacienteResponseDTO dto = pacienteService.toResponseDTO(paciente.get());
-            return ResponseEntity.ok(dto);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<PacienteResponseDTO> listarPacientePorId(@PathVariable @Min(1) Long id) {
+        Paciente paciente = pacienteService.findById(id);
+        PacienteResponseDTO dto = pacienteService.toResponseDTO(paciente);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public PacienteResponseDTO criarPaciente(@RequestBody PacienteRequestDTO pacienteDto) {
+    public PacienteResponseDTO criarPaciente(@Valid @RequestBody PacienteRequestDTO pacienteDto) {
         Paciente pacienteCriado = pacienteService.save(pacienteDto);
         return pacienteService.toResponseDTO(pacienteCriado);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PacienteResponseDTO> atualizarPaciente(@PathVariable Long id, @RequestBody PacienteRequestDTO pacienteDto) {
-        Optional<Paciente> pacienteExistente = pacienteService.findById(id);
-        if (pacienteExistente.isPresent()) {
-            Paciente pacienteAtualizado = pacienteExistente.get();
+    public ResponseEntity<PacienteResponseDTO> atualizarPaciente(@PathVariable @Min(1) Long id, @RequestBody PacienteUpdateRequestDTO pacienteDto) {
+        Paciente pacienteExistente = pacienteService.findById(id);
 
-            if (pacienteDto.getNome() != null) {
-                pacienteAtualizado.setNome(pacienteDto.getNome());
-            }
-            if (pacienteDto.getTelefone() != null) {
-                pacienteAtualizado.setTelefone(pacienteDto.getTelefone());
-            }
-
-            Paciente pacienteSalvo = pacienteService.save(pacienteAtualizado);
-            return ResponseEntity.ok(pacienteService.toResponseDTO(pacienteSalvo));
-        } else {
-            return ResponseEntity.notFound().build();
+        if (pacienteDto.getNome() != null) {
+            pacienteExistente.setNome(pacienteDto.getNome());
         }
+        if (pacienteDto.getTelefone() != null) {
+            pacienteExistente.setTelefone(pacienteDto.getTelefone());
+        }
+
+        Paciente pacienteSalvo = pacienteService.save(pacienteExistente);
+        return ResponseEntity.ok(pacienteService.toResponseDTO(pacienteSalvo));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarPaciente(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarPaciente(@PathVariable @Min(1) Long id) {
         pacienteService.delete(id);
         return ResponseEntity.noContent().build();
     }

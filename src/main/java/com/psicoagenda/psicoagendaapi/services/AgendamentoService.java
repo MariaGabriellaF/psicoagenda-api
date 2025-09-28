@@ -7,8 +7,8 @@ import com.psicoagenda.psicoagendaapi.models.Paciente;
 import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.models.StatusAgendamento;
 import com.psicoagenda.psicoagendaapi.repository.AgendamentoRepository;
-import com.psicoagenda.psicoagendaapi.repository.PacienteRepository;
-import com.psicoagenda.psicoagendaapi.repository.PsicologoRepository;
+import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
+import com.psicoagenda.psicoagendaapi.exception.InvalidDateRangeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,31 +18,36 @@ import java.util.Optional;
 @Service
 public class AgendamentoService {
 
-    @Autowired
-    private AgendamentoRepository agendamentoRepository;
 
-    @Autowired
-    private PsicologoRepository psicologoRepository;
+    private final AgendamentoRepository agendamentoRepository;
 
-    @Autowired
-    private PacienteRepository pacienteRepository;
+
+    private final PsicologoService psicologoService;
+
+
+    private final PacienteService pacienteService;
+
+    public AgendamentoService(
+            AgendamentoRepository agendamentoRepository,
+            PsicologoService psicologoService,
+            PacienteService pacienteService) {
+
+        this.agendamentoRepository = agendamentoRepository;
+        this.psicologoService = psicologoService;
+        this.pacienteService = pacienteService;
+    }
 
     public Agendamento save(AgendamentoRequestDTO agendamentoDto) {
-        Optional<Psicologo> psicologo = psicologoRepository.findById(agendamentoDto.getPsicologoId());
-        if (psicologo.isEmpty()) {
-            // Tratamento de erro ou exceção, se o psicólogo não for encontrado
-            return null;
+        if (agendamentoDto.getStartAt().isAfter(agendamentoDto.getEndAt())) {
+            throw new InvalidDateRangeException("A data de início deve ser anterior à data de fim.");
         }
 
-        Optional<Paciente> paciente = pacienteRepository.findById(agendamentoDto.getPacienteId());
-        if (paciente.isEmpty()) {
-            // Tratamento de erro ou exceção, se o paciente não for encontrado
-            return null;
-        }
+        Psicologo psicologo = psicologoService.findById(agendamentoDto.getPsicologoId());
+        Paciente paciente = pacienteService.findById(agendamentoDto.getPacienteId());
 
         Agendamento agendamento = new Agendamento();
-        agendamento.setPsicologo(psicologo.get());
-        agendamento.setPaciente(paciente.get());
+        agendamento.setPsicologo(psicologo);
+        agendamento.setPaciente(paciente);
         agendamento.setStartAt(agendamentoDto.getStartAt());
         agendamento.setEndAt(agendamentoDto.getEndAt());
         agendamento.setStatus(StatusAgendamento.valueOf(agendamentoDto.getStatus()));
@@ -74,8 +79,9 @@ public class AgendamentoService {
         return agendamentoRepository.findAll();
     }
 
-    public Optional<Agendamento> findById(Long id) {
-        return agendamentoRepository.findById(id);
+    public Agendamento findById(Long id) {
+        return agendamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Agendamento com o ID " + id + " não encontrado."));
     }
 
     public void delete(Long id) {

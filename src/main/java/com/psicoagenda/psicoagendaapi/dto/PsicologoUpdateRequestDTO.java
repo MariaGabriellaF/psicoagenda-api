@@ -1,20 +1,10 @@
 package com.psicoagenda.psicoagendaapi.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
-public class PsicologoRequestDTO {
-    @NotBlank
+public class PsicologoUpdateRequestDTO {
     private String nome;
-    @NotBlank
     private String especialidade;
-    @NotBlank
     private String crp;
-    private boolean teleatendimento;
-    @NotNull
-    @Valid
-    private UserRequestDTO user;
+    private Boolean teleatendimento;
 
     public String getNome() {
         return nome;
@@ -40,19 +30,11 @@ public class PsicologoRequestDTO {
         this.crp = crp;
     }
 
-    public boolean isTeleatendimento() {
+    public Boolean getTeleatendimento() {
         return teleatendimento;
     }
 
-    public void setTeleatendimento(boolean teleatendimento) {
+    public void setTeleatendimento(Boolean teleatendimento) {
         this.teleatendimento = teleatendimento;
-    }
-
-    public UserRequestDTO getUser() {
-        return user;
-    }
-
-    public void setUser(UserRequestDTO user) {
-        this.user = user;
     }
 }
