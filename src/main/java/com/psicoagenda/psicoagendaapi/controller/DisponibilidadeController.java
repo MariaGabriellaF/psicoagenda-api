@@ -60,4 +60,15 @@ public class DisponibilidadeController {
         disponibilidadeService.deleteAndAuthorize(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
+    @GetMapping("/psicologo/{psicologoId}")
+    public List<DisponibilidadeResponseDTO> listarDisponibilidadesPorPsicologo(
+            @PathVariable @Min(1) Long psicologoId) {
+
+        List<Disponibilidade> disponibilidades = disponibilidadeService.findByPsicologoId(psicologoId);
+        return disponibilidades.stream()
+                .map(disponibilidadeService::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 }

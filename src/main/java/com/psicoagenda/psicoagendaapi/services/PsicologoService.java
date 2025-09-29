@@ -46,8 +46,8 @@ public class PsicologoService {
         return psicologoRepository.save(psicologo);
     }
 
-    public Psicologo save(Psicologo psicologo) {
-        return psicologoRepository.save(psicologo);
+    public List<Psicologo> findByNome(String nome) {
+        return psicologoRepository.findByNomeContainingIgnoreCase(nome);
     }
 
     public PsicologoResponseDTO toResponseDTO(Psicologo psicologo) {
@@ -99,10 +99,6 @@ public class PsicologoService {
 
         return psicologoRepository.save(psicologoExistente);
     }
-
-    /**
-     * Deleta um psicólogo e checa se o ID do recurso é o mesmo do usuário autenticado.
-     */
     public void deleteAndAuthorize(Long id) {
         Psicologo psicologoExistente = findById(id);
 

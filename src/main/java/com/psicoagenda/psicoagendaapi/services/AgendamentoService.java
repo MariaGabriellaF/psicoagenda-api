@@ -11,7 +11,7 @@ import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.repository.AgendamentoRepository;
 import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import com.psicoagenda.psicoagendaapi.exception.InvalidDateRangeException;
-import com.psicoagenda.psicoagendaapi.security.SecurityService; // NOVO IMPORT
+import com.psicoagenda.psicoagendaapi.security.SecurityService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,19 +22,18 @@ public class AgendamentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final PsicologoService psicologoService;
     private final PacienteService pacienteService;
-    private final SecurityService securityService; // NOVO CAMPO
+    private final SecurityService securityService;
 
-    // Injeção via construtor
     public AgendamentoService(
             AgendamentoRepository agendamentoRepository,
             PsicologoService psicologoService,
             PacienteService pacienteService,
-            SecurityService securityService) { // NOVO PARAMETRO
+            SecurityService securityService) {
 
         this.agendamentoRepository = agendamentoRepository;
         this.psicologoService = psicologoService;
         this.pacienteService = pacienteService;
-        this.securityService = securityService; // INJEÇÃO
+        this.securityService = securityService;
     }
 
     public Agendamento save(AgendamentoRequestDTO agendamentoDto) {
@@ -56,14 +55,12 @@ public class AgendamentoService {
         return agendamentoRepository.save(agendamento);
     }
 
-    // Método refatorado para obter a role internamente
     public Agendamento updateAndAuthorize(
             Agendamento agendamentoExistente,
-            AgendamentoUpdateRequestDTO agendamentoDto) { // Parâmetro role removido
+            AgendamentoUpdateRequestDTO agendamentoDto) {
 
-        String userRoleString = securityService.getAuthenticatedUserRoleString(); // Obtendo a role aqui
+        String userRoleString = securityService.getAuthenticatedUserRoleString();
 
-        // Atualiza campos de tempo (sem restrição de role, já que a propriedade foi checada no Controller)
         if (agendamentoDto.getStartAt() != null) {
             agendamentoExistente.setStartAt(agendamentoDto.getStartAt());
         }
@@ -71,22 +68,17 @@ public class AgendamentoService {
             agendamentoExistente.setEndAt(agendamentoDto.getEndAt());
         }
 
-        // Regras de Negócios: Restrição de Status
         if (agendamentoDto.getStatus() != null) {
 
-            // Converte a role de string Spring Security (ROLE_X) para o enum.
             UserRole role = UserRole.valueOf(userRoleString.substring(5));
 
             if (role == UserRole.PACIENTE) {
-                // Paciente: SÓ pode alterar o status para CANCELED.
                 if (agendamentoDto.getStatus().equals(StatusAgendamento.CANCELED.name())) {
                     agendamentoExistente.setStatus(StatusAgendamento.valueOf(agendamentoDto.getStatus()));
                 } else {
-                    // Se o paciente tentar mudar para outro status que não CANCELED
                     throw new AccessDeniedException("Pacientes só podem alterar o status para CANCELED.");
                 }
             } else if (role == UserRole.PSICOLOGO) {
-                // Psicólogo pode alterar para qualquer status
                 agendamentoExistente.setStatus(StatusAgendamento.valueOf(agendamentoDto.getStatus()));
             }
         }
@@ -97,7 +89,6 @@ public class AgendamentoService {
         return agendamentoRepository.save(agendamentoExistente);
     }
 
-    // Mantém o método save original, que pode ser usado internamente ou por outros serviços
     public Agendamento save(Agendamento agendamento) {
         return agendamentoRepository.save(agendamento);
     }
@@ -126,7 +117,6 @@ public class AgendamentoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Agendamento com o ID " + id + " não encontrado."));
     }
 
-    // NOVO: findById com checagem de propriedade
     public Agendamento findByIdAndAuthorize(Long id) {
         Agendamento agendamento = findById(id);
 
@@ -143,11 +133,40 @@ public class AgendamentoService {
         return agendamentoRepository.findByPsicologoId(psicologoId);
     }
 
+    /**
+     * Lista agendamentos de um psicólogo. Apenas o próprio psicólogo autenticado tem acesso.
+     */
+    public List<Agendamento> listAgendamentosByPsicologoIdAndAuthorize(Long psicologoId) {
+        Long authenticatedUserId = securityService.getAuthenticatedUserId();
+
+        if (!psicologoId.equals(authenticatedUserId)) {
+            throw new AccessDeniedException("Você só pode visualizar a sua própria agenda de agendamentos.");
+        }
+
+        return findByPsicologoId(psicologoId);
+    }
+
     public List<Agendamento> findByPacienteId(Long pacienteId) {
         return agendamentoRepository.findByPacienteId(pacienteId);
     }
 
-    // NOVO: delete com checagem de propriedade
+    /**
+     * Lista agendamentos de um paciente. Acesso liberado para Psicólogos ou para o próprio Paciente.
+     */
+    public List<Agendamento> listAgendamentosByPacienteIdAndAuthorize(Long pacienteId) {
+        Long authenticatedUserId = securityService.getAuthenticatedUserId();
+        String role = securityService.getAuthenticatedUserRoleString();
+
+        // Se for paciente, só pode ver a sua própria agenda
+        if (role.equals("ROLE_" + UserRole.PACIENTE.name()) && !pacienteId.equals(authenticatedUserId)) {
+            throw new AccessDeniedException("Um paciente só pode visualizar a sua própria lista de agendamentos.");
+        }
+
+        // Se for psicólogo, ele pode ver a agenda de qualquer paciente.
+
+        return findByPacienteId(pacienteId);
+    }
+
     public void deleteAndAuthorize(Long id) {
         Agendamento agendamentoExistente = findById(id);
 
@@ -161,8 +180,7 @@ public class AgendamentoService {
         agendamentoRepository.deleteById(id);
     }
 
-    // Método refatorado para obter userId e role internamente
-    public List<Agendamento> listAgendamentosForAuthenticatedUser() { // Parâmetros userId e role removidos
+    public List<Agendamento> listAgendamentosForAuthenticatedUser() {
         Long userId = securityService.getAuthenticatedUserId();
         String role = securityService.getAuthenticatedUserRoleString();
 
@@ -174,8 +192,7 @@ public class AgendamentoService {
         return List.of();
     }
 
-    // Método refatorado para obter userId e role internamente
-    public Agendamento createAndAuthorize(AgendamentoRequestDTO agendamentoDto) { // Parâmetros userId e role removidos
+    public Agendamento createAndAuthorize(AgendamentoRequestDTO agendamentoDto) {
         Long userId = securityService.getAuthenticatedUserId();
         String role = securityService.getAuthenticatedUserRoleString();
 

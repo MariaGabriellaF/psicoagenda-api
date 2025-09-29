@@ -17,17 +17,20 @@ import java.util.stream.Collectors;
 public class PsicologoController {
 
     private final PsicologoService psicologoService;
-    // private final SecurityService securityService; // REMOVIDO
 
-    // Injeção via construtor
     public PsicologoController(PsicologoService psicologoService) {
         this.psicologoService = psicologoService;
         // this.securityService = securityService; // REMOVIDO
     }
 
     @GetMapping
-    public List<PsicologoResponseDTO> listarPsicologos() {
+    public List<PsicologoResponseDTO> listarPsicologos(@RequestParam(required = false) String nome) {
         List<Psicologo> psicologos = psicologoService.findAll();
+        if (nome != null && !nome.trim().isEmpty()) {
+            psicologos = psicologoService.findByNome(nome);
+        } else {
+            psicologos = psicologoService.findAll();
+        }
         return psicologos.stream()
                 .map(psicologoService::toResponseDTO)
                 .collect(Collectors.toList());

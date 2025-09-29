@@ -52,6 +52,27 @@ public class AgendamentoController {
         AgendamentoResponseDTO dto = agendamentoService.toResponseDTO(agendamento);
         return ResponseEntity.ok(dto);
     }
+    // NOVO: Rota para listar agendamentos de um psicólogo.
+    // Autorização apenas para PSICOLOGO (a checagem de ID é feita no Service)
+    @PreAuthorize("hasRole('PSICOLOGO')")
+    @GetMapping("/psicologo/{psicologoId}")
+    public List<AgendamentoResponseDTO> listarAgendamentosPorPsicologo(@PathVariable @Min(1) Long psicologoId) {
+        List<Agendamento> agendamentos = agendamentoService.listAgendamentosByPsicologoIdAndAuthorize(psicologoId);
+        return agendamentos.stream()
+                .map(agendamentoService::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // NOVO: Rota para listar agendamentos de um paciente.
+    // Autorização para PSICOLOGO e PACIENTE (a checagem de ID/Role é feita no Service)
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
+    @GetMapping("/paciente/{pacienteId}")
+    public List<AgendamentoResponseDTO> listarAgendamentosPorPaciente(@PathVariable @Min(1) Long pacienteId) {
+        List<Agendamento> agendamentos = agendamentoService.listAgendamentosByPacienteIdAndAuthorize(pacienteId);
+        return agendamentos.stream()
+                .map(agendamentoService::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 
     @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @PatchMapping("/{id}")
