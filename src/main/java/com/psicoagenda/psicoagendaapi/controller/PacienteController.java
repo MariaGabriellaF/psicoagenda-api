@@ -4,9 +4,7 @@ import com.psicoagenda.psicoagendaapi.dto.PacienteRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.PacienteResponseDTO;
 import com.psicoagenda.psicoagendaapi.dto.PacienteUpdateRequestDTO;
 import com.psicoagenda.psicoagendaapi.models.Paciente;
-import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.services.PacienteService;
-import com.psicoagenda.psicoagendaapi.security.SecurityService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
@@ -22,28 +20,23 @@ import java.util.stream.Collectors;
 public class PacienteController {
 
     private final PacienteService pacienteService;
-    private final SecurityService securityService; // Injeção do SecurityService
 
-    // Injeção via construtor
-    public PacienteController(PacienteService pacienteService, SecurityService securityService) {
+    public PacienteController(PacienteService pacienteService ) {
         this.pacienteService = pacienteService;
-        this.securityService = securityService;
     }
 
-    // Autorização: Permissão no SecurityConfig (somente PSICOLOGO pode listar)
     @GetMapping
     public List<PacienteResponseDTO> listarPacientes() {
         List<Paciente> pacientes = pacienteService.findAll();
         return pacientes.stream()
-                .map(paciente -> pacienteService.toResponseDTO(paciente))
+                .map(pacienteService::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    // GET /{id}: Paciente só pode ver o seu perfil. Psicólogo pode ver qualquer.
-    @PreAuthorize("hasRole('PSICOLOGO') or (hasRole('PACIENTE') and #id == @securityService.getAuthenticatedUserId())")
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<PacienteResponseDTO> listarPacientePorId(@PathVariable @Min(1) Long id) {
-        Paciente paciente = pacienteService.findById(id);
+        Paciente paciente = pacienteService.findByIdAndAuthorize(id);
         PacienteResponseDTO dto = pacienteService.toResponseDTO(paciente);
         return ResponseEntity.ok(dto);
     }
@@ -54,28 +47,17 @@ public class PacienteController {
         return pacienteService.toResponseDTO(pacienteCriado);
     }
 
-    // PATCH /{id}: Paciente só pode atualizar o seu perfil. Psicólogo pode atualizar qualquer.
-    @PreAuthorize("hasRole('PSICOLOGO') or (hasRole('PACIENTE') and #id == @securityService.getAuthenticatedUserId())")
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @PatchMapping("/{id}")
     public ResponseEntity<PacienteResponseDTO> atualizarPaciente(@PathVariable @Min(1) Long id, @RequestBody PacienteUpdateRequestDTO pacienteDto) {
-        Paciente pacienteExistente = pacienteService.findById(id);
-
-        if (pacienteDto.getNome() != null) {
-            pacienteExistente.setNome(pacienteDto.getNome());
-        }
-        if (pacienteDto.getTelefone() != null) {
-            pacienteExistente.setTelefone(pacienteDto.getTelefone());
-        }
-
-        Paciente pacienteSalvo = pacienteService.save(pacienteExistente);
+        Paciente pacienteSalvo = pacienteService.updateAndAuthorize(id, pacienteDto);
         return ResponseEntity.ok(pacienteService.toResponseDTO(pacienteSalvo));
     }
 
-    // DELETE /{id}: Paciente só pode deletar o seu perfil. Psicólogo pode deletar qualquer.
-    @PreAuthorize("hasRole('PSICOLOGO') or (hasRole('PACIENTE') and #id == @securityService.getAuthenticatedUserId())")
+    @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPaciente(@PathVariable @Min(1) Long id) {
-        pacienteService.delete(id);
+        pacienteService.deleteAndAuthorize(id);
         return ResponseEntity.noContent().build();
     }
 }

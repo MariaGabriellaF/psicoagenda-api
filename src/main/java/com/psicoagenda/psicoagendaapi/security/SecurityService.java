@@ -30,4 +30,11 @@ public class SecurityService {
         }
         throw new IllegalStateException("Usuário não autenticado ou Principal inválido.");
     }
+
+    /**
+     * Retorna o papel (role) do User logado no formato Spring Security (e.g., "ROLE_PSICOLOGO").
+     */
+    public String getAuthenticatedUserRoleString() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().iterator().next().getAuthority();
+    }
 }
