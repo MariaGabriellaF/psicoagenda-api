@@ -15,7 +15,7 @@ public class Paciente implements Serializable {
 
     private String telefone;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "id")
     private User user;

@@ -9,24 +9,19 @@ import com.psicoagenda.psicoagendaapi.models.StatusAgendamento;
 import com.psicoagenda.psicoagendaapi.repository.AgendamentoRepository;
 import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import com.psicoagenda.psicoagendaapi.exception.InvalidDateRangeException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class AgendamentoService {
 
 
     private final AgendamentoRepository agendamentoRepository;
-
-
     private final PsicologoService psicologoService;
-
-
     private final PacienteService pacienteService;
 
+    // Injeção via construtor
     public AgendamentoService(
             AgendamentoRepository agendamentoRepository,
             PsicologoService psicologoService,
@@ -36,6 +31,8 @@ public class AgendamentoService {
         this.psicologoService = psicologoService;
         this.pacienteService = pacienteService;
     }
+
+    // ... (restante do código de save e toResponseDTO)
 
     public Agendamento save(AgendamentoRequestDTO agendamentoDto) {
         if (agendamentoDto.getStartAt().isAfter(agendamentoDto.getEndAt())) {
@@ -82,6 +79,16 @@ public class AgendamentoService {
     public Agendamento findById(Long id) {
         return agendamentoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Agendamento com o ID " + id + " não encontrado."));
+    }
+
+    // NOVO Método para buscar agendamentos do psicólogo logado
+    public List<Agendamento> findByPsicologoId(Long psicologoId) {
+        return agendamentoRepository.findByPsicologoId(psicologoId);
+    }
+
+    // NOVO: Método para buscar agendamentos do paciente logado
+    public List<Agendamento> findByPacienteId(Long pacienteId) {
+        return agendamentoRepository.findByPacienteId(pacienteId);
     }
 
     public void delete(Long id) {

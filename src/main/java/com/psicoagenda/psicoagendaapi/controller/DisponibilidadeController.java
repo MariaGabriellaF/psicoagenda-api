@@ -7,12 +7,11 @@ import com.psicoagenda.psicoagendaapi.models.Disponibilidade;
 import com.psicoagenda.psicoagendaapi.services.DisponibilidadeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,9 +19,14 @@ import java.util.stream.Collectors;
 @Validated
 public class DisponibilidadeController {
 
-    @Autowired
-    private DisponibilidadeService disponibilidadeService;
+    private final DisponibilidadeService disponibilidadeService;
 
+    // Injeção via construtor
+    public DisponibilidadeController(DisponibilidadeService disponibilidadeService) {
+        this.disponibilidadeService = disponibilidadeService;
+    }
+
+    // Autorização: Permitido para todos (configurado no SecurityConfig)
     @GetMapping
     public List<DisponibilidadeResponseDTO> listarDisponibilidades() {
         List<Disponibilidade> disponibilidades = disponibilidadeService.findAll();
@@ -31,6 +35,7 @@ public class DisponibilidadeController {
                 .collect(Collectors.toList());
     }
 
+    // Autorização: Permitido para todos (configurado no SecurityConfig)
     @GetMapping("/{id}")
     public ResponseEntity<DisponibilidadeResponseDTO> listarDisponibilidadePorId(@PathVariable @Min(1) Long id) {
         Disponibilidade disponibilidade = disponibilidadeService.findById(id);
@@ -38,12 +43,16 @@ public class DisponibilidadeController {
         return ResponseEntity.ok(dto);
     }
 
+    // Autorização: APENAS PSICOLOGO
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PostMapping
     public DisponibilidadeResponseDTO criarDisponibilidade(@Valid @RequestBody DisponibilidadeRequestDTO disponibilidadeDto) {
         Disponibilidade disponibilidadeCriada = disponibilidadeService.save(disponibilidadeDto);
         return disponibilidadeService.toResponseDTO(disponibilidadeCriada);
     }
 
+    // Autorização: APENAS PSICOLOGO
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PatchMapping("/{id}")
     public ResponseEntity<DisponibilidadeResponseDTO> atualizarDisponibilidade(@PathVariable @Min(1) Long id, @RequestBody DisponibilidadeUpdateRequestDTO disponibilidadeDto) {
         Disponibilidade disponibilidadeExistente = disponibilidadeService.findById(id);
@@ -65,6 +74,8 @@ public class DisponibilidadeController {
         return ResponseEntity.ok(disponibilidadeService.toResponseDTO(disponibilidadeSalva));
     }
 
+    // Autorização: APENAS PSICOLOGO
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarDisponibilidade(@PathVariable @Min(1) Long id) {
         disponibilidadeService.delete(id);

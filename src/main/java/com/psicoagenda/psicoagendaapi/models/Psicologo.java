@@ -21,7 +21,7 @@ public class Psicologo implements Serializable {
 
     private boolean teleatendimento;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @MapsId
     @JoinColumn(name = "id")
     private User user;

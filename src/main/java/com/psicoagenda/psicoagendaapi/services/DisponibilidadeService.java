@@ -6,23 +6,21 @@ import com.psicoagenda.psicoagendaapi.models.Disponibilidade;
 import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.models.DiaSemana;
 import com.psicoagenda.psicoagendaapi.repository.DisponibilidadeRepository;
-import com.psicoagenda.psicoagendaapi.services.PsicologoService;
 import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DisponibilidadeService {
 
-    @Autowired
-    private DisponibilidadeRepository disponibilidadeRepository;
 
-    @Autowired
-    private PsicologoService psicologoService;
+    private final DisponibilidadeRepository disponibilidadeRepository;
+    private final PsicologoService psicologoService;
+
+    public DisponibilidadeService(DisponibilidadeRepository disponibilidadeRepository, PsicologoService psicologoService) {
+        this.disponibilidadeRepository = disponibilidadeRepository;
+        this.psicologoService = psicologoService;
+    }
 
     public Disponibilidade save(DisponibilidadeRequestDTO disponibilidadeDto) {
         Psicologo psicologo = psicologoService.findById(disponibilidadeDto.getPsicologoId());

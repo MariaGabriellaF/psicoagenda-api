@@ -7,20 +7,21 @@ import com.psicoagenda.psicoagendaapi.models.User;
 import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.repository.PacienteRepository;
 import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class PacienteService {
 
-    @Autowired
-    private PacienteRepository pacienteRepository;
 
-    @Autowired
-    private UserService userService;
+    private final PacienteRepository pacienteRepository;
+    private final UserService userService;
+
+    public PacienteService(PacienteRepository pacienteRepository, UserService userService) {
+        this.pacienteRepository = pacienteRepository;
+        this.userService = userService;
+    }
 
     public Paciente save(PacienteRequestDTO pacienteDto) {
         User user = new User();

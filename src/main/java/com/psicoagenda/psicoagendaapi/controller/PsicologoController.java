@@ -4,9 +4,10 @@ import com.psicoagenda.psicoagendaapi.dto.PsicologoRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.PsicologoResponseDTO;
 import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.services.PsicologoService;
+import com.psicoagenda.psicoagendaapi.security.SecurityService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +16,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/psicologos")
 public class PsicologoController {
 
-    @Autowired
-    private PsicologoService psicologoService;
+    private final PsicologoService psicologoService;
+    private final SecurityService securityService;
+
+    // Injeção via construtor
+    public PsicologoController(PsicologoService psicologoService, SecurityService securityService) {
+        this.psicologoService = psicologoService;
+        this.securityService = securityService;
+    }
 
     @GetMapping
     public List<PsicologoResponseDTO> listarPsicologos() {
@@ -39,6 +46,8 @@ public class PsicologoController {
         return psicologoService.toResponseDTO(psicologoCriado);
     }
 
+    // Autorização: APENAS PSICOLOGO e APENAS o seu próprio ID
+    @PreAuthorize("hasRole('PSICOLOGO') and #id == @securityService.getAuthenticatedUserId()")
     @PatchMapping("/{id}")
     public ResponseEntity<PsicologoResponseDTO> atualizarPsicologo(@PathVariable Long id, @RequestBody PsicologoRequestDTO psicologoDto) {
         Psicologo psicologoExistente = psicologoService.findById(id);
@@ -60,6 +69,8 @@ public class PsicologoController {
         return ResponseEntity.ok(psicologoService.toResponseDTO(psicologoSalvo));
     }
 
+    // Autorização: APENAS PSICOLOGO e APENAS o seu próprio ID
+    @PreAuthorize("hasRole('PSICOLOGO') and #id == @securityService.getAuthenticatedUserId()")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPsicologo(@PathVariable Long id) {
         psicologoService.delete(id);
