@@ -46,14 +46,11 @@ public class AgendamentoController {
     @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @GetMapping("/{id}")
     public ResponseEntity<AgendamentoResponseDTO> listarAgendamentoPorId(@PathVariable @Min(1) Long id) {
-        // Lógica de checagem de propriedade movida para o Service
         Agendamento agendamento = agendamentoService.findByIdAndAuthorize(id);
-
         AgendamentoResponseDTO dto = agendamentoService.toResponseDTO(agendamento);
         return ResponseEntity.ok(dto);
     }
-    // NOVO: Rota para listar agendamentos de um psicólogo.
-    // Autorização apenas para PSICOLOGO (a checagem de ID é feita no Service)
+
     @PreAuthorize("hasRole('PSICOLOGO')")
     @GetMapping("/psicologo/{psicologoId}")
     public List<AgendamentoResponseDTO> listarAgendamentosPorPsicologo(@PathVariable @Min(1) Long psicologoId) {
@@ -63,8 +60,6 @@ public class AgendamentoController {
                 .collect(Collectors.toList());
     }
 
-    // NOVO: Rota para listar agendamentos de um paciente.
-    // Autorização para PSICOLOGO e PACIENTE (a checagem de ID/Role é feita no Service)
     @PreAuthorize("hasAnyRole('PSICOLOGO', 'PACIENTE')")
     @GetMapping("/paciente/{pacienteId}")
     public List<AgendamentoResponseDTO> listarAgendamentosPorPaciente(@PathVariable @Min(1) Long pacienteId) {
@@ -81,7 +76,6 @@ public class AgendamentoController {
             @RequestBody AgendamentoUpdateRequestDTO agendamentoDto) {
 
         Agendamento agendamentoExistente = agendamentoService.findByIdAndAuthorize(id);
-
         Agendamento agendamentoSalvo = agendamentoService.updateAndAuthorize(
                 agendamentoExistente,
                 agendamentoDto

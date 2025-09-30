@@ -23,23 +23,31 @@ public class AgendamentoService {
     private final PsicologoService psicologoService;
     private final PacienteService pacienteService;
     private final SecurityService securityService;
+    private final DisponibilidadeService disponibilidadeService;
 
     public AgendamentoService(
             AgendamentoRepository agendamentoRepository,
             PsicologoService psicologoService,
             PacienteService pacienteService,
-            SecurityService securityService) {
+            SecurityService securityService,
+            DisponibilidadeService disponibilidadeService) {
 
         this.agendamentoRepository = agendamentoRepository;
         this.psicologoService = psicologoService;
         this.pacienteService = pacienteService;
         this.securityService = securityService;
+        this.disponibilidadeService = disponibilidadeService;
     }
 
     public Agendamento save(AgendamentoRequestDTO agendamentoDto) {
         if (agendamentoDto.getStartAt().isAfter(agendamentoDto.getEndAt())) {
             throw new InvalidDateRangeException("A data de início deve ser anterior à data de fim.");
         }
+        disponibilidadeService.validateAvailability(
+                agendamentoDto.getPsicologoId(),
+                agendamentoDto.getStartAt(),
+                agendamentoDto.getEndAt()
+        );
 
         Psicologo psicologo = psicologoService.findById(agendamentoDto.getPsicologoId());
         Paciente paciente = pacienteService.findById(agendamentoDto.getPacienteId());
@@ -133,9 +141,6 @@ public class AgendamentoService {
         return agendamentoRepository.findByPsicologoId(psicologoId);
     }
 
-    /**
-     * Lista agendamentos de um psicólogo. Apenas o próprio psicólogo autenticado tem acesso.
-     */
     public List<Agendamento> listAgendamentosByPsicologoIdAndAuthorize(Long psicologoId) {
         Long authenticatedUserId = securityService.getAuthenticatedUserId();
 
@@ -150,20 +155,12 @@ public class AgendamentoService {
         return agendamentoRepository.findByPacienteId(pacienteId);
     }
 
-    /**
-     * Lista agendamentos de um paciente. Acesso liberado para Psicólogos ou para o próprio Paciente.
-     */
     public List<Agendamento> listAgendamentosByPacienteIdAndAuthorize(Long pacienteId) {
         Long authenticatedUserId = securityService.getAuthenticatedUserId();
         String role = securityService.getAuthenticatedUserRoleString();
-
-        // Se for paciente, só pode ver a sua própria agenda
         if (role.equals("ROLE_" + UserRole.PACIENTE.name()) && !pacienteId.equals(authenticatedUserId)) {
             throw new AccessDeniedException("Um paciente só pode visualizar a sua própria lista de agendamentos.");
         }
-
-        // Se for psicólogo, ele pode ver a agenda de qualquer paciente.
-
         return findByPacienteId(pacienteId);
     }
 

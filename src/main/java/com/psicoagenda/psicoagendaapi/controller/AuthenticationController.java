@@ -1,7 +1,7 @@
 package com.psicoagenda.psicoagendaapi.controller;
 
 import com.psicoagenda.psicoagendaapi.dto.UserRequestDTO;
-import com.psicoagenda.psicoagendaapi.dto.LoginResponseDTO; // Necessário criar este DTO
+import com.psicoagenda.psicoagendaapi.dto.LoginResponseDTO;
 import com.psicoagenda.psicoagendaapi.security.JwtUtil;
 import com.psicoagenda.psicoagendaapi.security.UserDetailsServiceImpl;
 import jakarta.validation.Valid;
@@ -20,36 +20,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    public AuthenticationController(AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsService, JwtUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserRequestDTO authenticationRequest) { // Recebe email e senha [cite: 21]
+    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserRequestDTO authenticationRequest) {
 
         try {
-            // Tenta autenticar o usuário. O AuthenticationManager usa o UserDetailsServiceImpl e o BCryptPasswordEncoder [cite: 22, 133]
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getEmail(), authenticationRequest.getPassword())
             );
         }
         catch (BadCredentialsException e) {
-            // Falha: Credenciais inválidas [cite: 29]
-            return ResponseEntity.status(401).body("Credenciais inválidas."); // Retorna 401 Unauthorized [cite: 31]
+            return ResponseEntity.status(401).body("Credenciais inválidas.");
         }
 
-        // Sucesso: credenciais válidas [cite: 24]
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getEmail());
-
-        final String jwt = jwtUtil.generateToken(userDetails); // Gera o token [cite: 27]
-
-        // Retorna o token [cite: 28]
+        final String jwt = jwtUtil.generateToken(userDetails);
         return ResponseEntity.ok(new LoginResponseDTO(jwt));
     }
 }

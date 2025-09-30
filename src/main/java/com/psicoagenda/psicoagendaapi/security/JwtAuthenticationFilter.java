@@ -19,7 +19,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
-    // Injeção via construtor
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
@@ -34,20 +33,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = null;
         String jwt = null;
 
-        // Verifica se o cabeçalho existe e começa com "Bearer "
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7); // Extrai o token
-            username = jwtUtil.extractUsername(jwt); // Extrai o username (email)
+            jwt = authorizationHeader.substring(7);
+            username = jwtUtil.extractUsername(jwt);
         }
 
-        // Se o username for válido e não houver autenticação no contexto de segurança
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            if (jwtUtil.validateToken(jwt, userDetails)) { // Valida o token
+            if (jwtUtil.validateToken(jwt, userDetails)) {
 
-                // Configura a autenticação no contexto de segurança do Spring
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 usernamePasswordAuthenticationToken

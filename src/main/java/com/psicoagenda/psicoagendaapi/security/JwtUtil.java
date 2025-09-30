@@ -19,17 +19,17 @@ import java.util.function.Function;
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String SECRET_KEY; // Chave secreta injetada [cite: 181]
+    private String SECRET_KEY;
 
     @Value("${jwt.expiration}")
-    private long validityInMilliseconds; // Tempo de expiração injetado [cite: 183]
+    private long validityInMilliseconds;
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject); // O username é o 'subject' [cite: 48, 175]
+        return extractClaim(token, Claims::getSubject);
     }
 
     private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration); // A data de expiração é a 'exp' claim [cite: 51]
+        return extractClaim(token, Claims::getExpiration);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -51,7 +51,6 @@ public class JwtUtil {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        // Adiciona a role como claim customizada para uso posterior em autorização
         claims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
         return createToken(claims, userDetails.getUsername());
     }
@@ -61,14 +60,13 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds)) // Define a expiração [cite: 51]
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Assina com a chave secreta [cite: 57, 59]
+                .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        // Valida o username e se o token não expirou [cite: 166, 176]
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 

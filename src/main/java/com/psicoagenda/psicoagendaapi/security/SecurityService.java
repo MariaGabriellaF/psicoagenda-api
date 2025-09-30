@@ -14,16 +14,11 @@ public class SecurityService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Retorna o ID (PK) do User logado.
-     * O 'username' no Spring Security é o email, que é o campo único na entidade User.
-     */
     public Long getAuthenticatedUserId() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (principal instanceof UserDetails) {
             String email = ((UserDetails) principal).getUsername();
-            // Busca o User no banco pelo email para obter o ID (a chave primária)
             return userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Usuário autenticado não encontrado na base de dados."))
                     .getId();
@@ -31,9 +26,6 @@ public class SecurityService {
         throw new IllegalStateException("Usuário não autenticado ou Principal inválido.");
     }
 
-    /**
-     * Retorna o papel (role) do User logado no formato Spring Security (e.g., "ROLE_PSICOLOGO").
-     */
     public String getAuthenticatedUserRoleString() {
         return SecurityContextHolder.getContext().getAuthentication().getAuthorities().iterator().next().getAuthority();
     }

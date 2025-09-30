@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Paciente implements Serializable {
 
     @Id
-    private Long id; // A chave primária é a mesma da tabela 'users'
+    private Long id;
 
     @Column(nullable = false)
     private String nome;

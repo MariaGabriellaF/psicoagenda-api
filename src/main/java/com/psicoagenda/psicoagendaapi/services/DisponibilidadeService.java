@@ -3,6 +3,7 @@ package com.psicoagenda.psicoagendaapi.services;
 import com.psicoagenda.psicoagendaapi.dto.DisponibilidadeRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.DisponibilidadeResponseDTO;
 import com.psicoagenda.psicoagendaapi.dto.DisponibilidadeUpdateRequestDTO;
+import com.psicoagenda.psicoagendaapi.exception.InvalidDateRangeException;
 import com.psicoagenda.psicoagendaapi.models.Disponibilidade;
 import com.psicoagenda.psicoagendaapi.models.Psicologo;
 import com.psicoagenda.psicoagendaapi.models.DiaSemana;
@@ -11,6 +12,9 @@ import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
 import com.psicoagenda.psicoagendaapi.security.SecurityService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.DayOfWeek;
 import java.util.List;
 
 @Service
@@ -49,9 +53,6 @@ public class DisponibilidadeService {
         return save(disponibilidadeDto);
     }
 
-    public Disponibilidade save(Disponibilidade disponibilidade) {
-        return disponibilidadeRepository.save(disponibilidade);
-    }
 
     public DisponibilidadeResponseDTO toResponseDTO(Disponibilidade disponibilidade) {
         DisponibilidadeResponseDTO dto = new DisponibilidadeResponseDTO();
@@ -108,12 +109,49 @@ public class DisponibilidadeService {
         disponibilidadeRepository.deleteById(id);
     }
 
-    public void delete(Long id) {
-        disponibilidadeRepository.deleteById(id);
-    }
-
     public List<Disponibilidade> findByPsicologoId(Long psicologoId) {
         psicologoService.findById(psicologoId);
         return disponibilidadeRepository.findByPsicologoId(psicologoId);
+    }
+
+    public void validateAvailability(Long psicologoId, LocalDateTime startAt, LocalDateTime endAt) {
+        if (startAt.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateRangeException("Não é possível agendar consultas para o passado.");
+        }
+        DayOfWeek dayOfWeek = startAt.getDayOfWeek();
+        DiaSemana diaSemanaAgendamento = DiaSemana.fromDayOfWeek(dayOfWeek);
+
+        List<Disponibilidade> disponibilidades = findByPsicologoId(psicologoId);
+
+        boolean hasAvailability = false;
+
+        for (Disponibilidade disp : disponibilidades) {
+            if (disp.isRecorrente()) {
+                if (disp.getDiaSemana() == diaSemanaAgendamento) {
+                    LocalTime dispStartTime = disp.getStartAt().toLocalTime();
+                    LocalTime dispEndTime = disp.getEndAt().toLocalTime();
+                    LocalTime aptStartTime = startAt.toLocalTime();
+                    LocalTime aptEndTime = endAt.toLocalTime();
+                    if ((aptStartTime.equals(dispStartTime) || aptStartTime.isAfter(dispStartTime)) &&
+                            (aptEndTime.equals(dispEndTime) || aptEndTime.isBefore(dispEndTime))) {
+
+                        hasAvailability = true;
+                        break;
+                    }
+                }
+            }
+            else {
+                boolean isContained = (disp.getStartAt().isBefore(startAt) || disp.getStartAt().isEqual(startAt)) &&
+                        (disp.getEndAt().isAfter(endAt) || disp.getEndAt().isEqual(endAt));
+                if (isContained) {
+                    hasAvailability = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasAvailability) {
+            throw new InvalidDateRangeException("O psicólogo não possui disponibilidade cadastrada para o horário solicitado.");
+        }
     }
 }

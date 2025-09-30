@@ -20,7 +20,6 @@ public class PsicologoController {
 
     public PsicologoController(PsicologoService psicologoService) {
         this.psicologoService = psicologoService;
-        // this.securityService = securityService; // REMOVIDO
     }
 
     @GetMapping
@@ -49,17 +48,14 @@ public class PsicologoController {
         return psicologoService.toResponseDTO(psicologoCriado);
     }
 
-    // Autorização: APENAS PSICOLOGO (a checagem de ID é feita no Service)
-    @PreAuthorize("hasRole('PSICOLOGO')") // Simplificado. Antes: hasRole('PSICOLOGO') and #id == @securityService.getAuthenticatedUserId()
+    @PreAuthorize("hasRole('PSICOLOGO')") // Simplificado. Antes: hasRole('PSICOLOGO')
     @PatchMapping("/{id}")
-    // DTO alterado para PsicologoUpdateRequestDTO para suportar atualizações parciais
     public ResponseEntity<PsicologoResponseDTO> atualizarPsicologo(@PathVariable Long id, @RequestBody PsicologoUpdateRequestDTO psicologoDto) {
         Psicologo psicologoSalvo = psicologoService.updateAndAuthorize(id, psicologoDto);
         return ResponseEntity.ok(psicologoService.toResponseDTO(psicologoSalvo));
     }
 
-    // Autorização: APENAS PSICOLOGO (a checagem de ID é feita no Service)
-    @PreAuthorize("hasRole('PSICOLOGO')") // Simplificado. Antes: hasRole('PSICOLOGO') and #id == @securityService.getAuthenticatedUserId()
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarPsicologo(@PathVariable Long id) {
         psicologoService.deleteAndAuthorize(id);
