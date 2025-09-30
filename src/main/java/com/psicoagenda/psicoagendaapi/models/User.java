@@ -71,7 +71,6 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // Getter para o campo deleted
     public boolean isDeleted() {
         return deleted;
     }

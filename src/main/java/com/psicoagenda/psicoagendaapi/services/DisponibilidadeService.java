@@ -58,14 +58,11 @@ public class DisponibilidadeService {
         DisponibilidadeResponseDTO dto = new DisponibilidadeResponseDTO();
         dto.setId(disponibilidade.getId());
 
-        Psicologo psicologo = disponibilidade.getPsicologo(); // OBTÉM A REFERÊNCIA
-
-        // VERIFICA SE O PSICOLOGO FOI CARREGADO (NÃO DELETADO)
+        Psicologo psicologo = disponibilidade.getPsicologo();
         if (psicologo != null) {
             dto.setPsicologoId(psicologo.getId());
             dto.setPsicologoNome(psicologo.getNome());
         } else {
-            // Caso em que o Psicólogo associado foi soft deletado (NULL no EAGER fetch)
             dto.setPsicologoId(null);
             dto.setPsicologoNome("Psicólogo (Deletado/Ausente)");
         }
@@ -73,7 +70,6 @@ public class DisponibilidadeService {
         dto.setStartAt(disponibilidade.getStartAt());
         dto.setEndAt(disponibilidade.getEndAt());
         dto.setRecorrente(disponibilidade.isRecorrente());
-        // Trata o caso do DiaSemana, apenas por segurança
         dto.setDiaSemana(disponibilidade.getDiaSemana() != null ? disponibilidade.getDiaSemana().toString() : null);
         return dto;
     }

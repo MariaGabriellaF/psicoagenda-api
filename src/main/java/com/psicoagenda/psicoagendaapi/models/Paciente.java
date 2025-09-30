@@ -25,7 +25,7 @@ public class Paciente implements Serializable {
     private User user;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean deleted = false; // Campo para Soft Delete
+    private boolean deleted = false;
 
     public Paciente() {
     }

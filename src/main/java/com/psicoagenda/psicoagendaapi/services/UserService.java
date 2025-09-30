@@ -2,7 +2,7 @@ package com.psicoagenda.psicoagendaapi.services;
 
 import com.psicoagenda.psicoagendaapi.models.User;
 import com.psicoagenda.psicoagendaapi.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // Importação necessária
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 

@@ -2,14 +2,14 @@ package com.psicoagenda.psicoagendaapi.services;
 
 import com.psicoagenda.psicoagendaapi.dto.PacienteRequestDTO;
 import com.psicoagenda.psicoagendaapi.dto.PacienteResponseDTO;
-import com.psicoagenda.psicoagendaapi.dto.PacienteUpdateRequestDTO; // NOVO IMPORT
+import com.psicoagenda.psicoagendaapi.dto.PacienteUpdateRequestDTO;
 import com.psicoagenda.psicoagendaapi.models.Paciente;
 import com.psicoagenda.psicoagendaapi.models.User;
 import com.psicoagenda.psicoagendaapi.models.UserRole;
 import com.psicoagenda.psicoagendaapi.repository.PacienteRepository;
 import com.psicoagenda.psicoagendaapi.exception.ResourceNotFoundException;
-import com.psicoagenda.psicoagendaapi.security.SecurityService; // NOVO IMPORT
-import org.springframework.security.access.AccessDeniedException; // NOVO IMPORT
+import com.psicoagenda.psicoagendaapi.security.SecurityService;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 

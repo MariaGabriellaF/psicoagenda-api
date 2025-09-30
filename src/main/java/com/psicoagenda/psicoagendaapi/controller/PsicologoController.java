@@ -48,7 +48,7 @@ public class PsicologoController {
         return psicologoService.toResponseDTO(psicologoCriado);
     }
 
-    @PreAuthorize("hasRole('PSICOLOGO')") // Simplificado. Antes: hasRole('PSICOLOGO')
+    @PreAuthorize("hasRole('PSICOLOGO')")
     @PatchMapping("/{id}")
     public ResponseEntity<PsicologoResponseDTO> atualizarPsicologo(@PathVariable Long id, @RequestBody PsicologoUpdateRequestDTO psicologoDto) {
         Psicologo psicologoSalvo = psicologoService.updateAndAuthorize(id, psicologoDto);

@@ -1,6 +1,6 @@
 package com.psicoagenda.psicoagendaapi.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper; // Adicione este import
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.psicoagenda.psicoagendaapi.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,9 +15,8 @@ import java.util.List;
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    private final ObjectMapper objectMapper; // 1. DECLARE O CAMPO
+    private final ObjectMapper objectMapper;
 
-    // 2. INJETE O OBJECTMAPPER PELO CONSTRUTOR
     public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
@@ -38,7 +37,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                 List.of("Acesso negado. Token de autenticação ausente, inválido ou expirado.")
         );
 
-        // 3. USE O OBJECTMAPPER INJETADO
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }

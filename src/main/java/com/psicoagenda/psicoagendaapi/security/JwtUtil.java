@@ -46,7 +46,7 @@ public class JwtUtil {
     }
 
     private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date()); // Verifica se o token expirou [cite: 75, 176]
+        return extractExpiration(token).before(new Date());
     }
 
     public String generateToken(UserDetails userDetails) {

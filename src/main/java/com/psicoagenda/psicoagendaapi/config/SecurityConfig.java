@@ -30,7 +30,6 @@ public class SecurityConfig {
     private final AccessDeniedHandler accessDeniedHandler; // Handler 403
     private final AuthenticationEntryPoint authenticationEntryPoint; // Handler 401
 
-    // CONSTRUTOR ATUALIZADO
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             UserDetailsServiceImpl userDetailsService,
@@ -88,7 +87,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // NOVO: TRATAMENTO COMPLETO DE EXCEÇÃO DE SEGURANÇA
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(authenticationEntryPoint) // Para 401 Unauthorized
                         .accessDeniedHandler(accessDeniedHandler) // Para 403 Forbidden

@@ -32,7 +32,7 @@ public class Disponibilidade implements Serializable {
     private DiaSemana diaSemana;
 
     @Column(nullable = false, columnDefinition = "boolean default false")
-    private boolean deleted = false; // Campo para Soft Delete
+    private boolean deleted = false;
 
     public Disponibilidade() {
     }
