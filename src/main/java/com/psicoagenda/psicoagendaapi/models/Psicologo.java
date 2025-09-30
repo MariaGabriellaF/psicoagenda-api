@@ -2,13 +2,17 @@ package com.psicoagenda.psicoagendaapi.models;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "psicologos")
+@SQLDelete(sql = "UPDATE psicologos SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 public class Psicologo implements Serializable {
 
     @Id
-    private Long id; // A chave primária é a mesma da tabela 'users'
+    private Long id;
 
     @Column(nullable = false)
     private String nome;
@@ -25,6 +29,10 @@ public class Psicologo implements Serializable {
     @MapsId
     @JoinColumn(name = "id")
     private User user;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false; // Campo para Soft Delete
+
 
     public Psicologo() {
     }
@@ -83,5 +91,13 @@ public class Psicologo implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

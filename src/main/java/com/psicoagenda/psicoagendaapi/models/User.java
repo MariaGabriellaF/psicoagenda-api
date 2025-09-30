@@ -2,9 +2,13 @@ package com.psicoagenda.psicoagendaapi.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 public class User {
 
     @Id
@@ -23,6 +27,9 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false;
 
     public Long getId() {
         return id;
@@ -62,6 +69,16 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // Getter para o campo deleted
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    // Setter para o campo deleted
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @PrePersist

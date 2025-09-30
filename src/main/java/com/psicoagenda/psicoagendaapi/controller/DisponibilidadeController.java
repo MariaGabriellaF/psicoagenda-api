@@ -5,6 +5,7 @@ import com.psicoagenda.psicoagendaapi.dto.DisponibilidadeResponseDTO;
 import com.psicoagenda.psicoagendaapi.dto.DisponibilidadeUpdateRequestDTO;
 import com.psicoagenda.psicoagendaapi.models.Disponibilidade;
 import com.psicoagenda.psicoagendaapi.services.DisponibilidadeService;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class DisponibilidadeController {
         this.disponibilidadeService = disponibilidadeService;
     }
 
+    @Transactional(readOnly = true)
     @GetMapping
     public List<DisponibilidadeResponseDTO> listarDisponibilidades() {
         List<Disponibilidade> disponibilidades = disponibilidadeService.findAll();

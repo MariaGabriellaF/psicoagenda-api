@@ -3,9 +3,13 @@ package com.psicoagenda.psicoagendaapi.models;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "agendamentos")
+@SQLDelete(sql = "UPDATE agendamentos SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 public class Agendamento implements Serializable {
 
     @Id
@@ -34,6 +38,9 @@ public class Agendamento implements Serializable {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false; // Campo para Soft Delete
 
     public Agendamento() {
     }
@@ -114,5 +121,13 @@ public class Agendamento implements Serializable {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
